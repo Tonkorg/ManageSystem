@@ -5,6 +5,7 @@ import ru.test.ManageSystem.DTO.UserCreateDto;
 import ru.test.ManageSystem.DTO.UserDto;
 import ru.test.ManageSystem.entity.User;
 import ru.test.ManageSystem.exception.ResourceNotFoundException;
+import ru.test.ManageSystem.exception.UserAlreadyExistsException;
 import ru.test.ManageSystem.mapper.UserMapper;
 import ru.test.ManageSystem.repository.UserRepository;
 import ru.test.ManageSystem.security.UserDetailsImpl;
@@ -34,7 +35,7 @@ public class UserService implements UserDetailsService {
     @Transactional
     public UserDto createUser(UserCreateDto dto) {
         if (userRepository.findByEmail(dto.getEmail()).isPresent()) {
-            throw new IllegalArgumentException("Email already exists");
+            throw new UserAlreadyExistsException("Пользователь с таким email уже существует");
         }
         User user = User.builder()
                 .email(dto.getEmail())
