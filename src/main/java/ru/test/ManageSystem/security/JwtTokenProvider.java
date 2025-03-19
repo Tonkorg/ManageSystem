@@ -82,7 +82,7 @@ public class JwtTokenProvider {
 
         UserDetailsImpl userDetails = UserDetailsImpl.builder()
                 .email(claims.getSubject())
-                .password("") // Пароль не нужен при проверке токена
+                .password("")
                 .authorities(authorities)
                 .build();
 
