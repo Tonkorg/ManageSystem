@@ -4,7 +4,7 @@ server:
 spring:
   datasource:
     url: ${SPRING_DATASOURCE_URL:${SPRING_DATASOURCE_URL_LOCAL:jdbc:postgresql://localhost:5432/task_management_db}}
-    username: ${SPRING_DATASOURCE_USERNAME:your_username}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
     password: ${SPRING_DATASOURCE_PASSWORD:your_password}
     driver-class-name: org.postgresql.Driver
   jpa:
@@ -17,7 +17,7 @@ spring:
         format_sql: true
 
 jwt:
-  secret: ${JWT_SECRET:Zm9vYmFyMTIzNDU2Nzg5MGFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6MTIzNDU2Nzg5MGFiYw==}
+  secret: ${JWT_SECRET:your_secret_key}
   expiration: ${JWT_EXPIRATION:86400000}
 
 springdoc:
