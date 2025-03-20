@@ -8,7 +8,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import ru.test.ManageSystem.DTO.TaskCreateDto;
 import ru.test.ManageSystem.DTO.TaskDto;
 import ru.test.ManageSystem.DTO.TaskFilterDto;
@@ -148,6 +150,26 @@ public class TaskServiceTest {
         assertNotNull(result);
         assertEquals(task.getTitle(), result.getTitle());
         verify(taskRepository, times(1)).findById(1L);
+    }
+
+    @Test
+    void getTasks_ShouldReturnFilteredPagedTasks() {
+        TaskFilterDto filter = TaskFilterDto.builder()
+                .status(TaskStatus.PENDING)
+                .authorId(1L)
+                .build();
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Task> taskPage = new PageImpl<>(Collections.singletonList(task));
+
+        when(userService.getCurrentUser()).thenReturn(user);
+        when(taskRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(taskPage);
+
+        Page<TaskDto> result = taskService.getTasks(filter, pageable);
+
+        assertNotNull(result);
+        assertEquals(1, result.getTotalElements());
+        assertEquals(task.getTitle(), result.getContent().get(0).getTitle());
+        verify(taskRepository, times(1)).findAll(any(Specification.class), eq(pageable));
     }
 
     @Test
