@@ -17,6 +17,7 @@ import ru.test.ManageSystem.repository.UserRepository;
 
 import java.util.Collections;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -40,10 +41,8 @@ public class AuthControllerTest {
 
     @BeforeEach
     void setUp() {
-        // Очистка базы перед каждым тестом
         userRepository.deleteAll();
 
-        // Добавление тестового пользователя с закодированным паролем
         User existingUser = User.builder()
                 .email("existing@example.com")
                 .password(passwordEncoder.encode("password123"))
@@ -65,6 +64,23 @@ public class AuthControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value("newuser@example.com"));
+    }
+
+    @Test
+    public void testRegisterInvalidData() throws Exception {
+        UserCreateDto request = UserCreateDto.builder()
+                .email("invalid-email")
+                .password("123")
+                .roles(Collections.singleton("USER"))
+                .build();
+
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Validation failed"))
+                .andExpect(jsonPath("$.message").value(containsString("Неверный формат email")))
+                .andExpect(jsonPath("$.message").value(containsString("Пароль должен быть от 6 до 100 символов")));
     }
 
     @Test

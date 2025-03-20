@@ -1,5 +1,7 @@
 package ru.test.ManageSystem.DTO;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,9 +15,11 @@ import jakarta.validation.constraints.NotBlank;
 @Builder
 public class AuthRequest {
 
-    @NotBlank(message = "Email is required")
+    @NotBlank(message = "Email не может быть пустым")
+    @Email(message = "Неверный формат email")
     private String email;
 
-    @NotBlank(message = "Password is required")
+    @NotBlank(message = "Пароль не может быть пустым")
+    @Size(min = 6, max = 100, message = "Пароль должен быть от 6 до 100 символов")
     private String password;
 }

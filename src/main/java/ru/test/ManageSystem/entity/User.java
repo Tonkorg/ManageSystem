@@ -10,6 +10,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -32,9 +34,11 @@ public class User {
     private Long id;
 
     @Column(unique = true, nullable = false)
+    @Email
     private String email;
 
     @Column(nullable = false)
+    @Size(min = 6, max = 100, message = "Пароль должен быть от 6 до 100 символов")
     private String password;
 
     @Builder.Default

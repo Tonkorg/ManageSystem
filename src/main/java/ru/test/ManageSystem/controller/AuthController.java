@@ -56,35 +56,5 @@ public class AuthController {
         return ResponseEntity.ok(userService.createUser(dto));
     }
 
-    
-    @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<ErrorResponse> handleBadCredentialsException(BadCredentialsException ex) {
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .status(HttpStatus.UNAUTHORIZED.value())
-                .message("Неверный email или пароль")
-                .build();
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
-    }
 
-
-    @ExceptionHandler(BindException.class)
-    public ResponseEntity<Map<String, String>> handleValidationException(BindException ex) {
-        Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getAllErrors().forEach((error) -> {
-            String fieldName = ((FieldError) error).getField();
-            String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
-        });
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
-    }
-
-
-    @ExceptionHandler(UserAlreadyExistsException.class)
-    public ResponseEntity<ErrorResponse> handleUserAlreadyExistsException(UserAlreadyExistsException ex) {
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .status(HttpStatus.BAD_REQUEST.value())
-                .message(ex.getMessage())
-                .build();
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-    }
 }
