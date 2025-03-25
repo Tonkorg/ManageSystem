@@ -24,10 +24,8 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final TaskRepository taskRepository;
     private final UserService userService;
-    private final TaskService taskService;
 
     @Transactional
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER') and @taskService.isTaskAssigneeOrAuthor(#taskId)")
     public CommentDto createComment(Long taskId, String content) {
         Comment comment = Comment.builder()
                 .content(content)
@@ -40,7 +38,6 @@ public class CommentService {
     }
 
     @Transactional
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER') and @taskService.isTaskAssigneeOrAuthor(#taskId)")
     public CommentDto updateComment(Long taskId, Long commentId, String content) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Comment not found"));
@@ -52,7 +49,6 @@ public class CommentService {
     }
 
     @Transactional
-    @PreAuthorize("hasRole('ADMIN') or @commentService.isCommentAuthor(#commentId)")
     public void deleteComment(Long commentId) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Comment not found"));

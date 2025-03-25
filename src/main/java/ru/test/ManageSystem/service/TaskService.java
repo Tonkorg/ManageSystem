@@ -34,7 +34,6 @@ public class TaskService {
     private final UserService userService;
 
     @Transactional
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public TaskDto createTask(TaskCreateDto dto) {
         Task task = Task.builder()
                 .title(dto.getTitle())
@@ -55,7 +54,6 @@ public class TaskService {
     }
 
     @Transactional
-    @PreAuthorize("hasRole('ADMIN') or @taskService.isTaskAssigneeOrAuthor(#id)")
     public TaskDto updateTask(Long id, TaskCreateDto dto) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Task not found"));
@@ -80,7 +78,6 @@ public class TaskService {
     }
 
     @Transactional
-    @PreAuthorize("hasRole('ADMIN')")
     public TaskDto updateTaskStatus(Long id, TaskStatus status) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Task not found"));
@@ -90,7 +87,6 @@ public class TaskService {
     }
 
     @Transactional
-    @PreAuthorize("hasRole('ADMIN') or @taskService.isTaskAuthor(#id)")
     public void deleteTask(Long id) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Task not found"));
