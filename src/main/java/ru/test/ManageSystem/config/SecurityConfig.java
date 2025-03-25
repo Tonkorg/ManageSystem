@@ -19,16 +19,34 @@ import ru.test.ManageSystem.security.JwtTokenProvider;
 
 import java.util.Arrays;
 
+/**
+ * Конфигурация безопасности приложения.
+ * Настраивает Spring Security для использования JWT-аутентификации, CORS и шифрования паролей.
+ */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
 
+    /**
+     * Конструктор с зависимостью от {@link JwtTokenProvider}.
+     *
+     * @param jwtTokenProvider провайдер для работы с JWT-токенами
+     */
     public SecurityConfig(JwtTokenProvider jwtTokenProvider) {
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
+    /**
+     * Настраивает цепочку фильтров безопасности.
+     * Отключает CSRF, устанавливает stateless-сессии, настраивает правила авторизации запросов
+     * и добавляет фильтр JWT-аутентификации.
+     *
+     * @param http объект {@link HttpSecurity} для конфигурации безопасности
+     * @return объект {@link SecurityFilterChain}, представляющий настроенную цепочку фильтров
+     * @throws Exception если возникает ошибка при конфигурации
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -53,16 +71,35 @@ public class SecurityConfig {
         return http.build();
     }
 
+    /**
+     * Предоставляет бин для шифрования паролей.
+     * Использует алгоритм BCrypt для хэширования паролей.
+     *
+     * @return объект {@link PasswordEncoder} для шифрования паролей
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * Предоставляет менеджер аутентификации из конфигурации Spring Security.
+     *
+     * @param config объект {@link AuthenticationConfiguration} для получения менеджера аутентификации
+     * @return объект {@link AuthenticationManager} для управления аутентификацией
+     * @throws Exception если возникает ошибка при получении менеджера
+     */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 
+    /**
+     * Настраивает источник конфигурации CORS.
+     * Определяет разрешённые источники, методы, заголовки и поддержку credentials.
+     *
+     * @return объект {@link CorsConfigurationSource} с настройками CORS
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();

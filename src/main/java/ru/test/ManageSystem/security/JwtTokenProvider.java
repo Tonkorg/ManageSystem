@@ -10,7 +10,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Component;
 
-
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Base64;
@@ -18,6 +17,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Провайдер для работы с JWT-токенами.
+ * Отвечает за генерацию, валидацию и извлечение данных из токенов,
+ * а также создание объекта аутентификации для Spring Security.
+ */
 @Component
 public class JwtTokenProvider {
 
@@ -27,11 +31,22 @@ public class JwtTokenProvider {
     @Value("${jwt.expiration:86400000}")
     private long validityInMilliseconds;
 
+    /**
+     * Инициализирует секретный ключ, преобразуя его в Base64-формат.
+     * Вызывается автоматически после создания бина.
+     */
     @PostConstruct
     protected void init() {
         secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
     }
 
+    /**
+     * Генерирует JWT-токен на основе данных аутентификации.
+     * Включает имя пользователя и роли в токен, устанавливает время создания и истечения.
+     *
+     * @param authentication объект {@link Authentication} с данными аутентифицированного пользователя
+     * @return строка с сгенерированным JWT-токеном
+     */
     public String generateToken(Authentication authentication) {
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         Date now = new Date();
@@ -48,6 +63,13 @@ public class JwtTokenProvider {
                 .compact();
     }
 
+    /**
+     * Извлекает имя пользователя (email) из JWT-токена.
+     *
+     * @param token строка с JWT-токеном
+     * @return имя пользователя (email), указанное в токене
+     * @throws JwtException если токен некорректен или не может быть распарсен
+     */
     public String getUsernameFromToken(String token) {
         return Jwts.parser()
                 .setSigningKey(secretKey.getBytes(StandardCharsets.UTF_8))
@@ -57,6 +79,13 @@ public class JwtTokenProvider {
                 .getSubject();
     }
 
+    /**
+     * Проверяет валидность JWT-токена.
+     * Возвращает true, если токен действителен и подписан правильным ключом.
+     *
+     * @param token строка с JWT-токеном
+     * @return {@code true}, если токен валиден, иначе {@code false}
+     */
     public boolean validateToken(String token) {
         try {
             Jwts.parser()
@@ -69,6 +98,14 @@ public class JwtTokenProvider {
         }
     }
 
+    /**
+     * Создаёт объект аутентификации на основе данных из JWT-токена.
+     * Извлекает имя пользователя и роли, формирует объект {@link UserDetailsImpl}.
+     *
+     * @param token строка с JWT-токеном
+     * @return объект {@link Authentication} для использования в Spring Security
+     * @throws JwtException если токен некорректен или не может быть распарсен
+     */
     public Authentication getAuthentication(String token) {
         Claims claims = Jwts.parser()
                 .setSigningKey(secretKey.getBytes(StandardCharsets.UTF_8))

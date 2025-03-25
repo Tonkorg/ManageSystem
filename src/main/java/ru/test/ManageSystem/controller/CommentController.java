@@ -15,6 +15,11 @@ import ru.test.ManageSystem.service.CommentService;
 
 import java.util.List;
 
+/**
+ * Контроллер для управления комментариями к задачам.
+ * Предоставляет методы для создания, обновления, удаления и получения комментариев,
+ * связанных с конкретной задачей.
+ */
 @RestController
 @RequestMapping("/api/tasks/{taskId}/comments")
 @RequiredArgsConstructor
@@ -23,6 +28,17 @@ public class CommentController {
 
     private final CommentService commentService;
 
+    /**
+     * Создаёт новый комментарий к указанной задаче.
+     * Доступно только для пользователей с ролями ADMIN или USER, которые являются автором
+     * или исполнителем задачи.
+     *
+     * @param taskId идентификатор задачи, к которой добавляется комментарий
+     * @param dto    объект {@link CommentCreateDto} с содержимым комментария
+     * @return ResponseEntity с объектом {@link CommentDto}, представляющим созданный комментарий
+     * @throws org.springframework.security.access.AccessDeniedException если у пользователя нет прав
+     * @throws jakarta.persistence.EntityNotFoundException если задача не найдена
+     */
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'USER') and @taskService.isTaskAssigneeOrAuthor(#taskId)")
     @Operation(summary = "Создать комментарий", description = "Добавляет новый комментарий к задаче")
@@ -36,6 +52,18 @@ public class CommentController {
         return ResponseEntity.ok(commentService.createComment(taskId, dto.getContent()));
     }
 
+    /**
+     * Обновляет существующий комментарий к задаче.
+     * Доступно только для пользователей с ролями ADMIN или USER, которые являются автором
+     * или исполнителем задачи.
+     *
+     * @param taskId    идентификатор задачи, к которой относится комментарий
+     * @param commentId идентификатор комментария, который нужно обновить
+     * @param dto       объект {@link CommentCreateDto} с новым содержимым комментария
+     * @return ResponseEntity с объектом {@link CommentDto}, представляющим обновлённый комментарий
+     * @throws org.springframework.security.access.AccessDeniedException если у пользователя нет прав
+     * @throws jakarta.persistence.EntityNotFoundException если задача или комментарий не найдены
+     */
     @PutMapping("/{commentId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER') and @taskService.isTaskAssigneeOrAuthor(#taskId)")
     @Operation(summary = "Обновить комментарий", description = "Обновляет существующий комментарий")
@@ -50,6 +78,15 @@ public class CommentController {
         return ResponseEntity.ok(commentService.updateComment(taskId, commentId, dto.getContent()));
     }
 
+    /**
+     * Удаляет комментарий по его идентификатору.
+     * Доступно для администраторов или автора комментария.
+     *
+     * @param commentId идентификатор комментария, который нужно удалить
+     * @return ResponseEntity с кодом 204 (No Content) при успешном удалении
+     * @throws org.springframework.security.access.AccessDeniedException если у пользователя нет прав
+     * @throws jakarta.persistence.EntityNotFoundException если комментарий не найден
+     */
     @DeleteMapping("/{commentId}")
     @PreAuthorize("hasRole('ADMIN') or @commentService.isCommentAuthor(#commentId)")
     @Operation(summary = "Удалить комментарий", description = "Удаляет комментарий по ID")
@@ -58,12 +95,21 @@ public class CommentController {
             @ApiResponse(responseCode = "403", description = "Нет доступа"),
             @ApiResponse(responseCode = "404", description = "Комментарий не найден")
     })
-    public ResponseEntity<Void> deleteComment(@PathVariable Long taskId,
-                                              @PathVariable Long commentId) {
+    public ResponseEntity<Void> deleteComment(@PathVariable Long commentId) {
         commentService.deleteComment(commentId);
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * Возвращает список всех комментариев для указанной задачи.
+     * Доступно только для пользователей с ролями ADMIN или USER, которые являются автором
+     * или исполнителем задачи.
+     *
+     * @param taskId идентификатор задачи, для которой запрашиваются комментарии
+     * @return ResponseEntity со списком объектов {@link CommentDto}, представляющих комментарии
+     * @throws org.springframework.security.access.AccessDeniedException если у пользователя нет прав
+     * @throws jakarta.persistence.EntityNotFoundException если задача не найдена
+     */
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'USER') and @taskService.isTaskAssigneeOrAuthor(#taskId)")
     @Operation(summary = "Получить комментарии задачи", description = "Возвращает все комментарии для указанной задачи")
